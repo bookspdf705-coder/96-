@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>96</title>
+<style>
+  :root{
+    --paper:#FBFBFD; --ink:#1D1D1F; --smoke:#86868B; --mist:#F5F5F7;
+    --gold:#C9A24B; --gold-soft:rgba(201,162,75,0.12); --gold-line:rgba(201,162,75,0.3);
+    --line:rgba(0,0,0,0.08); --card:rgba(0,0,0,0.02); --card-hover:rgba(0,0,0,0.035);
+    --glass:rgba(251,251,253,0.72);
+    --bg:#FBFBFD; --fg:#1D1D1F;
+  }
+  html.dark{
+    --bg:#000000; --fg:#F5F5F7; --smoke:#86868B;
+    --card:rgba(255,255,255,0.03); --card-hover:rgba(255,255,255,0.05);
+    --line:rgba(255,255,255,0.12); --glass:rgba(0,0,0,0.55);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; background:var(--bg); color:var(--fg);
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",Inter,"Helvetica Neue",Arial,sans-serif;
+    -webkit-font-smoothing:antialiased; transition:background-color .4s ease,color .4s ease;
+    min-height:100vh;
+  }
+  .display{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Inter,"Helvetica Neue",Arial,sans-serif;}
+  ::selection{background:rgba(201,162,75,.35);}
+
+  /* Navbar */
+  header{position:fixed;inset:0 0 auto 0;z-index:50;display:flex;justify-content:center;padding:16px;}
+  nav{
+    width:100%;max-width:640px;display:flex;align-items:center;justify-content:space-between;
+    border-radius:999px;padding:8px;border:1px solid var(--line);
+    background:var(--glass); backdrop-filter:saturate(180%) blur(20px); -webkit-backdrop-filter:saturate(180%) blur(20px);
+    box-shadow:0 1px 1px rgba(0,0,0,.03),0 8px 30px rgba(0,0,0,.06);
+  }
+  html.dark nav{box-shadow:0 1px 1px rgba(0,0,0,.4),0 8px 30px rgba(0,0,0,.5);}
+  .logo{padding:0 12px 0 12px;font-size:15px;font-weight:600;letter-spacing:-0.03em;color:var(--fg);text-decoration:none;}
+  .tabs{display:flex;gap:4px;background:rgba(0,0,0,0.05);padding:4px;border-radius:999px;}
+  html.dark .tabs{background:rgba(255,255,255,0.05);}
+  .tab{border:none;background:transparent;padding:6px 16px;border-radius:999px;font-size:13px;font-weight:500;color:var(--smoke);cursor:pointer;transition:all .2s;}
+  .tab.active{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,0.06);}
+  html.dark .tab.active{background:rgba(255,255,255,0.15);color:#fff;}
+  .tab:hover:not(.active){color:var(--fg);}
+  .theme-btn{width:32px;height:32px;border-radius:999px;border:none;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--fg);margin-right:4px;}
+  .theme-btn:hover{background:rgba(0,0,0,0.05);}
+  html.dark .theme-btn:hover{background:rgba(255,255,255,0.1);}
+
+  main{padding-top:96px;min-height:100vh;}
+  .page{display:none;animation:fadeIn .5s ease both;}
+  .page.active{display:block;}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+  /* Home */
+  .home-wrap{max-width:760px;margin:0 auto;padding:40px 24px 140px;text-align:center;}
+  .badge{display:inline-block;border:1px solid var(--gold-line);background:var(--gold-soft);color:var(--gold);
+    padding:5px 16px;border-radius:999px;font-size:12px;font-weight:500;letter-spacing:.02em;
+    animation:fadeUp .7s cubic-bezier(.16,1,.3,1) both;}
+  h1.hero{
+    margin:28px 0 0; font-size:44px; font-weight:600; letter-spacing:-0.05em; line-height:1.05;
+    animation:fadeUp .7s cubic-bezier(.16,1,.3,1) .08s both;
+  }
+  @media(min-width:640px){h1.hero{font-size:64px;}}
+  p.sub{
+    max-width:520px;margin:20px auto 0;color:var(--smoke);font-size:17px;line-height:1.6;
+    animation:fadeUp .7s cubic-bezier(.16,1,.3,1) .16s both;
+  }
+  @media(min-width:640px){p.sub{font-size:19px;}}
+
+  .upload-wrap{margin-top:56px;animation:fadeUp .7s cubic-bezier(.16,1,.3,1) .24s both;text-align:left;}
+  .dropzone{
+    min-height:240px;border-radius:28px;border:1px solid var(--line);background:var(--card);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;
+    transition:all .3s;text-align:center;
+  }
+  .dropzone:hover{background:var(--card-hover);border-color:rgba(0,0,0,.2);}
+  html.dark .dropzone:hover{border-color:rgba(255,255,255,.2);}
+  .dropzone.dragging{border-color:var(--gold);background:var(--gold-soft);transform:scale(1.01);}
+  .drop-icon{width:56px;height:56px;border-radius:999px;background:var(--gold-soft);color:var(--gold);display:flex;align-items:center;justify-content:center;}
+  .drop-title{margin-top:16px;font-size:17px;font-weight:500;}
+  .drop-sub{margin-top:4px;font-size:13px;color:var(--smoke);}
+
+  .fields{margin-top:20px;display:grid;gap:12px;grid-template-columns:1fr;}
+  @media(min-width:640px){.fields{grid-template-columns:1fr 1fr;}}
+  .field label{display:block;margin-bottom:6px;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.04em;color:var(--smoke);}
+  .field input{
+    width:100%;padding:12px 16px;border-radius:12px;border:1px solid var(--line);
+    background:rgba(255,255,255,0.6);color:var(--fg);font-size:15px;outline:none;transition:border-color .2s;
+  }
+  html.dark .field input{background:rgba(255,255,255,0.04);}
+  .field input:focus{border-color:rgba(201,162,75,.6);}
+  .field input::placeholder{color:var(--smoke);opacity:.8;}
+
+  .queue{margin-top:32px;}
+  .queue-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  .queue-head p{font-size:13px;color:var(--smoke);margin:0;}
+  .add-btn{border:none;background:var(--ink);color:#fff;padding:9px 20px;border-radius:999px;font-size:13px;font-weight:500;cursor:pointer;transition:transform .15s;}
+  html.dark .add-btn{background:#fff;color:var(--ink);}
+  .add-btn:active{transform:scale(.95);}
+  .qgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+  @media(min-width:640px){.qgrid{grid-template-columns:repeat(3,1fr);}}
+  @media(min-width:768px){.qgrid{grid-template-columns:repeat(4,1fr);}}
+  .qitem{position:relative;aspect-ratio:1;border-radius:16px;overflow:hidden;background:var(--card);}
+  .qitem img{width:100%;height:100%;object-fit:cover;}
+  .qstatus{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0);transition:background .2s;}
+  .qstatus span{border-radius:999px;padding:4px 12px;font-size:12px;font-weight:500;color:#fff;opacity:0;transition:opacity .2s;}
+  .qitem.done .qstatus{background:rgba(0,0,0,.15);}
+  .qitem.done .qstatus span{opacity:1;background:var(--gold);}
+
+  .foot-note{margin-top:40px;font-size:13px;color:var(--smoke);opacity:.8;animation:fadeUp .7s cubic-bezier(.16,1,.3,1) .3s both;}
+  .foot-note b{color:var(--fg);font-weight:500;}
+
+  /* Wall */
+  .wall-wrap{max-width:1120px;margin:0 auto;padding:24px 20px 140px;}
+  @media(min-width:640px){.wall-wrap{padding:24px 32px 140px;}}
+  .wall-head{max-width:560px;margin:0 auto 48px;text-align:center;}
+  .wall-head h1{font-size:36px;font-weight:600;letter-spacing:-0.05em;margin:0;animation:fadeUp .7s cubic-bezier(.16,1,.3,1) both;}
+  @media(min-width:640px){.wall-head h1{font-size:48px;}}
+  .wall-head p{margin-top:12px;color:var(--smoke);font-size:16px;animation:fadeUp .7s cubic-bezier(.16,1,.3,1) .08s both;}
+
+  .masonry{columns:2;column-gap:12px;}
+  @media(min-width:640px){.masonry{columns:3;}}
+  @media(min-width:768px){.masonry{columns:4;}}
+  .pcard{
+    display:block;width:100%;break-inside:avoid;margin-bottom:12px;border-radius:16px;overflow:hidden;
+    position:relative;border:none;padding:0;cursor:pointer;background:var(--card);
+    animation:fadeUp .5s cubic-bezier(.16,1,.3,1) both;
+  }
+  .pcard img{display:block;width:100%;transition:transform .5s;}
+  .pcard:hover img{transform:scale(1.05);}
+  .pcaption{
+    position:absolute;left:0;right:0;bottom:0;padding:12px;
+    background:linear-gradient(to top, rgba(0,0,0,.7), rgba(0,0,0,.08), transparent);
+    opacity:0;transition:opacity .3s;text-align:left;
+  }
+  .pcard:hover .pcaption{opacity:1;}
+  .pcaption .cap{color:#fff;font-size:12.5px;font-weight:500;margin:0;}
+  .pcaption .name{color:rgba(255,255,255,.7);font-size:11px;margin:4px 0 0;}
+
+  /* Lightbox */
+  .lightbox{
+    position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;
+    background:rgba(0,0,0,.85);backdrop-filter:blur(10px);padding:16px;animation:fadeIn .3s ease;
+  }
+  .lightbox.open{display:flex;}
+  .lightbox-close{position:absolute;top:20px;right:20px;width:40px;height:40px;border-radius:999px;background:rgba(255,255,255,.1);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .lightbox-close:hover{background:rgba(255,255,255,.2);}
+  .lightbox-inner{max-width:900px;width:100%;max-height:88vh;display:flex;flex-direction:column;align-items:center;}
+  .lightbox-inner img{max-height:72vh;width:auto;max-width:100%;border-radius:16px;object-fit:contain;}
+  .lightbox-cap{margin-top:20px;max-width:520px;text-align:center;}
+  .lightbox-cap .cap{color:#fff;font-size:19px;margin:0;}
+  .lightbox-cap .meta{color:rgba(255,255,255,.5);font-size:13px;margin-top:8px;}
+
+  .preview-tag{
+    position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:60;
+    background:var(--ink);color:#fff;font-size:11.5px;padding:6px 14px;border-radius:999px;
+    opacity:.85;letter-spacing:.02em;
+  }
+  html.dark .preview-tag{background:rgba(255,255,255,.9);color:#000;}
+</style>
+</head>
+<body>
+
+<header>
+  <nav>
+    <a href="#" class="logo display">96</a>
+    <div class="tabs">
+      <button class="tab active" onclick="showPage('home')">Home</button>
+      <button class="tab" onclick="showPage('wall')">The Wall</button>
+    </div>
+    <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"></button>
+  </nav>
+</header>
+
+<main>
+  <!-- HOME -->
+  <section class="page active" id="page-home">
+    <div class="home-wrap">
+      <span class="badge">Twelve years led here</span>
+      <h1 class="hero display">Every memory,<br>kept in one place.</h1>
+      <p class="sub">As we close this chapter, add the photos that made it ours — the friends, the classrooms, the last days that felt like forever.</p>
+
+      <div class="upload-wrap">
+        <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+          <input type="file" id="fileInput" accept="image/*" multiple style="display:none" onchange="handleFiles(this.files)">
+          <div class="drop-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 16V4M12 4l-4.5 4.5M12 4l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <p class="drop-title display">Drop photos here, or click to choose</p>
+          <p class="drop-sub">JPG, PNG, HEIC, WEBP · up to 15MB each</p>
+        </div>
+
+        <div class="fields">
+          <div class="field">
+            <label>Your name (optional)</label>
+            <input type="text" id="nameInput" placeholder="Who's adding these?" maxlength="60">
+          </div>
+          <div class="field">
+            <label>Caption (optional)</label>
+            <input type="text" id="captionInput" placeholder="What's the memory?" maxlength="200">
+          </div>
+        </div>
+
+        <div class="queue" id="queue" style="display:none">
+          <div class="queue-head">
+            <p id="queueCount">0 photos selected</p>
+            <button class="add-btn" onclick="addAllToWall()">Add to the wall</button>
+          </div>
+          <div class="qgrid" id="qgrid"></div>
+        </div>
+      </div>
+
+      <p class="foot-note">Everything you add here shows up on <b>The Wall</b> for everyone to see.</p>
+    </div>
+  </section>
+
+  <!-- WALL -->
+  <section class="page" id="page-wall">
+    <div class="wall-wrap">
+      <div class="wall-head">
+        <h1 class="display">The Wall</h1>
+        <p>Every photo, from everyone. Tap any of them to look closer.</p>
+      </div>
+      <div class="masonry" id="masonry"></div>
+    </div>
+  </section>
+</main>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+  <button class="lightbox-close" onclick="closeLightbox(event)">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  </button>
+  <div class="lightbox-inner" onclick="event.stopPropagation()">
+    <img id="lightboxImg" src="" alt="">
+    <div class="lightbox-cap">
+      <p class="cap" id="lightboxCap"></p>
+      <p class="meta" id="lightboxMeta"></p>
+    </div>
+  </div>
+</div>
+
+<div class="preview-tag">Visual preview — not connected to real storage</div>
+
+<script>
+  // ---- Sample demo photos (stand-ins for real uploads) ----
+  const demoPhotos = [
+    { url: "https://picsum.photos/seed/96a/600/800", name: "Priya", caption: "Last day of school, front gate", uploadedAt: "2026-03-14" },
+    { url: "https://picsum.photos/seed/96b/700/500", name: "Arjun", caption: "Farewell party, table 4", uploadedAt: "2026-03-10" },
+    { url: "https://picsum.photos/seed/96c/600/900", name: "Meera", caption: "Board exam eve, still smiling", uploadedAt: "2026-03-08" },
+    { url: "https://picsum.photos/seed/96d/650/650", name: null, caption: "Canteen crew, one last lunch", uploadedAt: "2026-03-05" },
+    { url: "https://picsum.photos/seed/96e/600/850", name: "Rahul", caption: null, uploadedAt: "2026-03-01" },
+    { url: "https://picsum.photos/seed/96f/700/550", name: "Sana", caption: "Trip to the hills, batch of 96", uploadedAt: "2026-02-27" },
+    { url: "https://picsum.photos/seed/96g/600/780", name: null, caption: "Sports day finals", uploadedAt: "2026-02-20" },
+    { url: "https://picsum.photos/seed/96h/650/700", name: "Vikram", caption: "Signing yearbooks", uploadedAt: "2026-02-15" },
+  ];
+  let photos = [...demoPhotos];
+  let queueItems = [];
+
+  function renderWall(){
+    const el = document.getElementById('masonry');
+    el.innerHTML = '';
+    photos.forEach((p, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'pcard';
+      btn.style.animationDelay = (Math.min(i,12)*40) + 'ms';
+      btn.onclick = () => openLightbox(p);
+      let capHtml = '';
+      if (p.caption || p.name){
+        capHtml = `<div class="pcaption">${p.caption ? `<p class="cap">${escapeHtml(p.caption)}</p>` : ''}${p.name ? `<p class="name">${escapeHtml(p.name)}</p>` : ''}</div>`;
+      }
+      btn.innerHTML = `<img src="${p.url}" alt="" loading="lazy">${capHtml}`;
+      el.appendChild(btn);
+    });
+  }
+
+  function escapeHtml(s){
+    return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function openLightbox(p){
+    document.getElementById('lightboxImg').src = p.url;
+    document.getElementById('lightboxCap').textContent = p.caption || '';
+    document.getElementById('lightboxCap').style.display = p.caption ? 'block' : 'none';
+    const date = new Date(p.uploadedAt).toLocaleDateString(undefined, {month:'long', day:'numeric', year:'numeric'});
+    document.getElementById('lightboxMeta').textContent = (p.name ? p.name + ' · ' : '') + date;
+    document.getElementById('lightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox(e){
+    document.getElementById('lightbox').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('keydown', e => { if(e.key === 'Escape') closeLightbox(); });
+
+  function showPage(name){
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  // ---- Upload zone behavior (client-side only demo) ----
+  const dropzone = document.getElementById('dropzone');
+  dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragging'); });
+  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragging'));
+  dropzone.addEventListener('drop', e => {
+    e.preventDefault(); dropzone.classList.remove('dragging');
+    handleFiles(e.dataTransfer.files);
+  });
+
+  function handleFiles(fileList){
+    const files = Array.from(fileList).filter(f => f.type.startsWith('image/'));
+    files.forEach(file => {
+      const url = URL.createObjectURL(file);
+      queueItems.push({ file, url, done:false });
+    });
+    renderQueue();
+  }
+
+  function renderQueue(){
+    const q = document.getElementById('queue');
+    const grid = document.getElementById('qgrid');
+    if (queueItems.length === 0){ q.style.display = 'none'; return; }
+    q.style.display = 'block';
+    document.getElementById('queueCount').textContent = `${queueItems.length} photo${queueItems.length>1?'s':''} selected`;
+    grid.innerHTML = '';
+    queueItems.forEach((item, i) => {
+      const div = document.createElement('div');
+      div.className = 'qitem' + (item.done ? ' done' : '');
+      div.innerHTML = `<img src="${item.url}"><div class="qstatus"><span>${item.done ? 'Added ✓' : ''}</span></div>`;
+      grid.appendChild(div);
+    });
+  }
+
+  function addAllToWall(){
+    const name = document.getElementById('nameInput').value.trim();
+    const caption = document.getElementById('captionInput').value.trim();
+    queueItems.forEach(item => {
+      if (item.done) return;
+      item.done = true;
+      photos.unshift({ url: item.url, name: name || null, caption: caption || null, uploadedAt: new Date().toISOString() });
+    });
+    renderQueue();
+    renderWall();
+  }
+
+  // ---- Theme ----
+  function setThemeIcon(isDark){
+    const btn = document.getElementById('themeBtn');
+    btn.innerHTML = isDark
+      ? `<svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 2.5v2.4M12 19.1v2.4M21.5 12h-2.4M4.9 12H2.5M18.6 5.4l-1.7 1.7M7.1 16.9l-1.7 1.7M18.6 18.6l-1.7-1.7M7.1 7.1L5.4 5.4"/></g></svg>`
+      : `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M20.7 14.9A9 9 0 1 1 9.1 3.3a7.2 7.2 0 0 0 11.6 11.6Z"/></svg>`;
+  }
+  function toggleTheme(){
+    const isDark = document.documentElement.classList.toggle('dark');
+    setThemeIcon(isDark);
+  }
+  // default to dark, matching the real site
+  document.documentElement.classList.add('dark');
+  setThemeIcon(true);
+
+  renderWall();
+</script>
+
+</body>
+</html>
