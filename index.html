@@ -166,12 +166,12 @@
 
 <header>
   <nav>
-    <a href="#" class="logo display">96</a>
+    <a href="#home" class="logo display" data-page="home">96</a>
     <div class="tabs">
-      <button class="tab active" onclick="showPage('home')">Home</button>
-      <button class="tab" onclick="showPage('wall')">The Wall</button>
+      <button type="button" class="tab active" data-page="home">Home</button>
+      <button type="button" class="tab" data-page="wall">The Wall</button>
     </div>
-    <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"></button>
+    <button type="button" class="theme-btn" id="themeBtn" aria-label="Toggle theme"></button>
   </nav>
 </header>
 
@@ -184,22 +184,22 @@
       <p class="sub">As we close this chapter, add the photos that made it ours — the friends, the classrooms, the last days that felt like forever.</p>
 
       <div class="upload-wrap">
-        <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
-          <input type="file" id="fileInput" accept="image/*" multiple style="display:none" onchange="handleFiles(this.files)">
+        <input type="file" id="fileInput" accept="image/*" multiple hidden>
+        <label class="dropzone" id="dropzone" for="fileInput">
           <div class="drop-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 16V4M12 4l-4.5 4.5M12 4l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
           <p class="drop-title display">Drop photos here, or click to choose</p>
           <p class="drop-sub">JPG, PNG, HEIC, WEBP · up to 15MB each</p>
-        </div>
+        </label>
 
         <div class="fields">
           <div class="field">
-            <label>Your name (optional)</label>
+            <label for="nameInput">Your name (optional)</label>
             <input type="text" id="nameInput" placeholder="Who's adding these?" maxlength="60">
           </div>
           <div class="field">
-            <label>Caption (optional)</label>
+            <label for="captionInput">Caption (optional)</label>
             <input type="text" id="captionInput" placeholder="What's the memory?" maxlength="200">
           </div>
         </div>
@@ -207,7 +207,7 @@
         <div class="queue" id="queue" style="display:none">
           <div class="queue-head">
             <p id="queueCount">0 photos selected</p>
-            <button class="add-btn" onclick="addAllToWall()">Add to the wall</button>
+            <button type="button" class="add-btn" id="addToWallBtn">Add to the wall</button>
           </div>
           <div class="qgrid" id="qgrid"></div>
         </div>
@@ -229,11 +229,11 @@
   </section>
 </main>
 
-<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
-  <button class="lightbox-close" onclick="closeLightbox(event)">
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo preview">
+  <button type="button" class="lightbox-close" id="lightboxClose" aria-label="Close photo preview">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
   </button>
-  <div class="lightbox-inner" onclick="event.stopPropagation()">
+  <div class="lightbox-inner">
     <img id="lightboxImg" src="" alt="">
     <div class="lightbox-cap">
       <p class="cap" id="lightboxCap"></p>
@@ -289,7 +289,7 @@
     document.getElementById('lightbox').classList.add('open');
     document.body.style.overflow = 'hidden';
   }
-  function closeLightbox(e){
+  function closeLightbox(){
     document.getElementById('lightbox').classList.remove('open');
     document.body.style.overflow = '';
   }
@@ -298,13 +298,31 @@
   function showPage(name){
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('page-' + name).classList.add('active');
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    event.currentTarget.classList.add('active');
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.classList.toggle('active', tab.dataset.page === name);
+    });
     window.scrollTo({top:0, behavior:'smooth'});
   }
 
   // ---- Upload zone behavior (client-side only demo) ----
   const dropzone = document.getElementById('dropzone');
+  const fileInput = document.getElementById('fileInput');
+  document.querySelectorAll('[data-page]').forEach(control => {
+    control.addEventListener('click', event => {
+      event.preventDefault();
+      showPage(control.dataset.page);
+    });
+  });
+  document.getElementById('themeBtn').addEventListener('click', toggleTheme);
+  document.getElementById('addToWallBtn').addEventListener('click', addAllToWall);
+  document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+  document.getElementById('lightbox').addEventListener('click', event => {
+    if (event.target === event.currentTarget) closeLightbox();
+  });
+  fileInput.addEventListener('change', () => {
+    handleFiles(fileInput.files);
+    fileInput.value = '';
+  });
   dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragging'); });
   dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragging'));
   dropzone.addEventListener('drop', e => {
